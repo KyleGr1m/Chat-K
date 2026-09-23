@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Chat-Box</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .admin-wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+    .admin-header h1 { margin: 0; font-size: 22px; }
+    .admin-actions button {
+      background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-left: 6px;
+    }
+    .admin-actions button:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    th, td { text-align: left; padding: 10px 12px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    th { background: var(--panel-2); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    tr:last-child td { border-bottom: none; }
+    .del-btn { background: var(--danger); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+    .empty { text-align: center; color: var(--muted); padding: 30px; }
+  </style>
+</head>
+<body>
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h1>Admin Panel</h1>
+      <div class="admin-actions">
+        <button id="refresh">Refresh</button>
+        <button id="logout">Logout</button>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:60px">ID</th>
+          <th style="width:160px">User</th>
+          <th>Message</th>
+          <th style="width:170px">Time</th>
+          <th style="width:90px">Action</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('adminToken');
+    if (!token) window.location.href = '/admin/login';
+
+    const rowsEl = document.getElementById('rows');
+    const fmt = (ts) => new Date(ts).toLocaleString();
+
+    async function load() {
+      const res = await fetch('/api/admin/messages', { headers: { 'x-admin-token': token } });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+        return;
+      }
+      const data = await res.json();
+      rowsEl.innerHTML = '';
+      if (!data.messages || !data.messages.length) {
+        rowsEl.innerHTML = '<tr><td colspan="5" class="empty">No messages yet.</td></tr>';
+        return;
+      }
+      data.messages.forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.id}</td>
+          <td></td>
+          <td></td>
+          <td>${fmt(m.timestamp)}</td>
+          <td><button class="del-btn" data-id="${m.id}">Delete</button></td>
+        `;
+        tr.children[1].textContent = m.username;
+        tr.children[2].textContent = m.message;
+        rowsEl.appendChild(tr);
+      });
+
+      rowsEl.querySelectorAll('.del-btn').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('Delete this message?')) return;
+          await fetch('/api/admin/messages/' + btn.dataset.id, {
+            method: 'DELETE',
+            headers: { 'x-admin-token': token }
+          });
+          load();
+        };
+      });
+    }
+
+    document.getElementById('refresh').onclick = load;
+    document.getElementById('logout').onclick = () => {
+      localStorage.removeItem('adminToken');
+      window.location.href = '/admin/login';
+    };
+
+    load();
+  </script>
+</body>
+</html>
