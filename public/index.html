@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat-Box</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2>Chat-Box</h2>
+        <button id="theme-toggle" class="icon-btn" title="Toggle theme">🌙</button>
+      </div>
+
+      <div class="me">
+        <span class="label">You are</span>
+        <div class="me-name-row">
+          <span id="my-username">…</span>
+          <button id="edit-username" class="icon-btn" title="Edit username">✏️</button>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Online — <span id="online-count">0</span></h3>
+        <ul id="online-users" class="user-list"></ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="/admin/login">Admin</a>
+      </div>
+    </aside>
+
+    <main class="chat">
+      <header class="chat-header">
+        <button id="sidebar-toggle" class="icon-btn" title="Toggle sidebar">☰</button>
+        <h1># room</h1>
+        <div id="typing-indicator" class="typing-indicator"></div>
+      </header>
+
+      <div id="messages" class="messages"></div>
+
+      <div id="reply-preview" class="reply-preview hidden">
+        <div class="reply-preview-inner">
+          <span id="reply-text"></span>
+          <button id="cancel-reply" class="icon-btn" type="button">✕</button>
+        </div>
+      </div>
+
+      <form id="composer" class="composer">
+        <button type="button" id="emoji-btn" class="icon-btn" title="Emoji">😀</button>
+        <button type="button" id="file-btn" class="icon-btn" title="Attach file">📎</button>
+        <input type="file" id="file-input" hidden />
+        <input type="text" id="input" placeholder="Type a message…" autocomplete="off" />
+        <button type="submit" class="send-btn">Send</button>
+      </form>
+
+      <div id="emoji-picker" class="emoji-picker hidden"></div>
+    </main>
+
+    <aside id="dm-panel" class="dm-panel hidden">
+      <header class="dm-header">
+        <h2>DM with <span id="dm-with"></span></h2>
+        <button id="close-dm" class="icon-btn">✕</button>
+      </header>
+      <div id="dm-messages" class="messages"></div>
+      <form id="dm-composer" class="composer">
+        <input type="text" id="dm-input" placeholder="Type a private message…" autocomplete="off" />
+        <button type="submit" class="send-btn">Send</button>
+      </form>
+    </aside>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>
